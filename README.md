@@ -1,4 +1,6 @@
 # Internal Client
+TODO
+
 Proof of concept implementation of Internal client library for fleet protocol v2 as described
 [here](https://docs.google.com/document/d/19h2yEh3DzIizKZc-iHWpUrQIrLyop7FQUBzUi_K9LWY/edit).  
 API of this implementation is based on ANSI C api proposed in fleet protocol internal client [header file](https://gitlab.bringauto.com/bring-auto/fleet-protocol-v2/fleet-protocol/-/blob/master/lib/module_api/include/internal_client/internal_client.h). Some things are adapted to python ways of doing things, e.g. errors are handled via exceptions instead of return values.

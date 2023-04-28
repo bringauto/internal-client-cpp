@@ -3,10 +3,6 @@
 #include <internal_client.h>
 
 #include <google/protobuf/util/message_differencer.h>
-//TODO remove
-#include "modules/CarAccessoryModule.pb.h"
-
-
 
 namespace protobuf {
 struct buffer ProtoSerializer::serializeProtobufMessage(const google::protobuf::Message &protobufMessage) {
@@ -28,8 +24,6 @@ ProtoSerializer::createInternalStatus(const struct buffer &statusData, const Int
 
 	deviceStatus->set_statusdata(statusData.data, statusData.size_in_bytes);
 
-	CarAccessoryModule::ButtonStatus buttonStatus;
-	buttonStatus.ParseFromString(deviceStatus->statusdata());
 	return internalClientMessage;
 }
 
@@ -46,7 +40,7 @@ int ProtoSerializer::checkAndParseCommand(std::string *command, const std::strin
 	}
 
 	if (internalServerMessage.has_devicecommand()) {
-		if(google::protobuf::util::MessageDifferencer::Equals(internalServerMessage.devicecommand().device(), device)) {
+		if(not internalServerMessage.devicecommand().has_device() || google::protobuf::util::MessageDifferencer::Equals(internalServerMessage.devicecommand().device(), device)) {
 			return DEVICE_INCORRECT;
 		}
 
@@ -54,7 +48,7 @@ int ProtoSerializer::checkAndParseCommand(std::string *command, const std::strin
 //		auto commandData = std::make_unique<char[]>(commandSize);
 //		std::memcpy(commandData.get(), internalServerMessage.devicecommand().commanddata().data(), commandSize);
 		command->resize(commandSize);
-		std::memcpy(&((*command)[0]), internalServerMessage.devicecommand().commanddata().data(), commandSize);
+		std::memcpy(&command[0], internalServerMessage.devicecommand().commanddata().data(), commandSize);
 // TODO fix this
 
 //		*command = std::string(internalServerMessage.devicecommand().commanddata().data(), commandSize);

@@ -21,11 +21,12 @@ int main() {
 
 	auto status = protobuf::ProtoSerializer::serializeProtobufMessage(buttonStatus);
 
-	rc = send_status(con, status, 60);
-	if(rc != OK ) {
-		return 1;
+	for(int i = 0; i < 10; ++i) {
+		rc = send_status(con, status, 60);
+		if(rc != OK) {
+			return 1;
+		}
 	}
-
 	buffer command {};
 	rc = get_command(con, &command);
 	if(rc != OK ) {

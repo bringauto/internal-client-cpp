@@ -36,7 +36,6 @@ public:
 private:
 	int socket_ { -1};
 	InternalProtocol::Device device_ {};
-	// struct buffer command_ {}; // TODO unique pointer
 	std::unique_ptr<char[]> commandData_ {};
 	size_t commandSize_;
 };

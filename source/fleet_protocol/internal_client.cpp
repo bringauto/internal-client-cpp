@@ -1,4 +1,3 @@
-// TODO file names, path
 #include <internal_client.h>
 #include <Context.hpp>
 #include <protobuf/ProtoSerializer.hpp>
@@ -84,9 +83,8 @@ int get_command(void *context, struct buffer *command) {
 	if(context == nullptr) {
 		return CONTEXT_INCORRECT;
 	}
-	// TODO malloc and return
 	auto currentContext = (Context *)context;
-//	*command = currentContext->getCommandData();
+
 	auto newCommandSize = currentContext->getCommandSize();
 	if(command->size_in_bytes <= 0) {
 		return NO_COMMAND_AVAILABLE;
