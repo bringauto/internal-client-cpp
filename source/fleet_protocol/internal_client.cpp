@@ -80,6 +80,7 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 
 int get_command(void *context, struct buffer *command) {
 	// TODO can I do realloc on the input command?
+	// napsat ze mi musi dat plne inicializovanou
 	if(context == nullptr) {
 		return CONTEXT_INCORRECT;
 	}
@@ -89,7 +90,14 @@ int get_command(void *context, struct buffer *command) {
 	if(command->size_in_bytes <= 0) {
 		return NO_COMMAND_AVAILABLE;
 	}
-	if (command->size_in_bytes < newCommandSize) {
+
+	if (command->size_in_bytes == 0) {
+		if ((command->data = malloc(newCommandSize)) == nullptr) {
+			return NOT_OK;
+		}
+	} else if (command->size_in_bytes > 0 && command->data == nullptr) {
+		return NOT_OK;
+	} else if (command->size_in_bytes < newCommandSize) {
 		if ((command->data = realloc(command->data, newCommandSize)) == nullptr) {
 			return NOT_OK;
 		}
