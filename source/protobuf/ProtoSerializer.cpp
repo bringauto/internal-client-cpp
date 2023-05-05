@@ -45,13 +45,9 @@ int ProtoSerializer::checkAndParseCommand(std::string *command, const std::strin
 		}
 
 		auto commandSize = internalServerMessage.devicecommand().commanddata().length();
-//		auto commandData = std::make_unique<char[]>(commandSize);
-//		std::memcpy(commandData.get(), internalServerMessage.devicecommand().commanddata().data(), commandSize);
 		command->resize(commandSize);
 		std::memcpy(&command[0], internalServerMessage.devicecommand().commanddata().data(), commandSize);
-// TODO fix this
 
-//		*command = std::string(internalServerMessage.devicecommand().commanddata().data(), commandSize);
 		return OK;
 	} else {
 		return COMMAND_INCORRECT;
@@ -67,8 +63,8 @@ InternalProtocol::InternalClient ProtoSerializer::createInternalConnect(const In
 	return internalClientMessage;
 }
 
-int ProtoSerializer::checkAndParseConnectResponse(const std::string &internalServerConnectResponse,
-												  const InternalProtocol::Device &device) {
+int ProtoSerializer::checkConnectResponse(const std::string &internalServerConnectResponse,
+										  const InternalProtocol::Device &device) {
 	if(internalServerConnectResponse.empty()) {
 		return NOT_OK;
 	}
@@ -84,23 +80,7 @@ int ProtoSerializer::checkAndParseConnectResponse(const std::string &internalSer
 															  device)) {
 			return DEVICE_INCORRECT;
 		}
-
-		// TODO is it okay to have this here? It is close to internal_client functionality
-		switch (deviceConnectResponse.responsetype()) {
-			case InternalProtocol::DeviceConnectResponse_ResponseType_OK:
-				return OK;
-			case InternalProtocol::DeviceConnectResponse_ResponseType_ALREADY_CONNECTED:
-				return DEVICE_ALREADY_CONNECTED;
-			case InternalProtocol::DeviceConnectResponse_ResponseType_MODULE_NOT_SUPPORTED:
-				return MODULE_NOT_SUPPORTED;
-			case InternalProtocol::DeviceConnectResponse_ResponseType_DEVICE_NOT_SUPPORTED:
-				return DEVICE_TYPE_NOT_SUPPORTED;
-			case InternalProtocol::DeviceConnectResponse_ResponseType_HIGHER_PRIORITY_ALREADY_CONNECTED:
-				return HIGHER_PRIORITY_ALREADY_CONNECTED;
-			default:
-				return NOT_OK;
-		}
-
+		return OK;
 	} else {
 		return NOT_OK;
 	}

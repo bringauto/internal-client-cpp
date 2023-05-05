@@ -38,4 +38,6 @@ private:
 	InternalProtocol::Device device_ {};
 	std::unique_ptr<char[]> commandData_ {};
 	size_t commandSize_;
+
+	static constexpr short headerSize_ { 4 };
 };

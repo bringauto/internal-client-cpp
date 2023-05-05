@@ -1,6 +1,7 @@
 #include <internal_client.h>
 #include <Context.hpp>
 #include <protobuf/ProtoSerializer.hpp>
+#include <helpers/EnumMappers.hpp>
 
 #include <thread>
 #include <future>
@@ -25,7 +26,10 @@ int init_connection(void **context, const char *const ipv4_address, unsigned por
 	}
 
 	std::string connectResponse = newContext->readFromSocket();
-	return protobuf::ProtoSerializer::checkAndParseConnectResponse(connectResponse, newContext->getDevice());
+	if (int retCode = protobuf::ProtoSerializer::checkConnectResponse(connectResponse, newContext->getDevice()) != OK) {
+		return retCode;
+	}
+	return helpers::EnumMappers::ConnectResponseToInternalClientCode(connectResponse);
 }
 
 int destroy_connection(void **context) {

@@ -41,7 +41,7 @@ void Context::setDevice(struct device_identification device) {
 
 
 size_t Context::sendMessage(struct buffer message) {
-	if(send(socket_, &message.size_in_bytes, sizeof(uint32_t), 0) != 4) {
+	if(send(socket_, &message.size_in_bytes, sizeof(uint32_t), 0) != headerSize_) {
 		return NOT_OK;
 	}
 	size_t bytesSent = send(socket_, message.data, message.size_in_bytes, 0);

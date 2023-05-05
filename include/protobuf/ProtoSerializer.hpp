@@ -15,7 +15,7 @@ public:
 
 	static InternalProtocol::InternalClient createInternalConnect(const InternalProtocol::Device &device);
 
-	static int checkAndParseConnectResponse(const std::string &internalServerConnectResponse, const InternalProtocol::Device& device);
+	static int checkConnectResponse(const std::string &internalServerConnectResponse, const InternalProtocol::Device& device);
 
 	static int checkAndParseCommand(std::string *command, const std::string &internalServerCommand,
 									const InternalProtocol::Device& device);
