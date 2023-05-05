@@ -1,3 +1,4 @@
 _*/
 cmake-build-debug/
+lib/*
 .idea/
