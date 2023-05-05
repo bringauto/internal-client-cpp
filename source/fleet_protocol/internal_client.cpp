@@ -79,6 +79,8 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 }
 
 int get_command(void *context, struct buffer *command) {
+	// TODO can I do realloc on the input command?
+	// napsat ze mi musi dat plne inicializovanou
 	if(context == nullptr) {
 		return CONTEXT_INCORRECT;
 	}
