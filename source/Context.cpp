@@ -44,10 +44,12 @@ size_t Context::sendMessage(struct buffer message) {
 	if(send(socket_, &message.size_in_bytes, sizeof(uint32_t), 0) != headerSize_) {
 		return NOT_OK;
 	}
-	size_t bytesSent = send(socket_, message.data, message.size_in_bytes, 0);
+	size_t bytesSent = send(socket_, message.data, message.size_in_bytes,  MSG_NOSIGNAL);
+	// Flag MSG_NOSIGNAL prevents the socket form sending signal SIGPIPE. This only works on Linux and must be changed for other platforms
 	return bytesSent;
 }
 
+// TODO split into readSize, readCommand. In readSize i can reconnect
 std::string Context::readFromSocket() {
 	uint32_t commandSize;
 	if (recv(socket_, &commandSize, sizeof(uint32_t), 0) != sizeof(uint32_t)) {

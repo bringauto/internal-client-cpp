@@ -1,6 +1,5 @@
 #include <internal_client.h>
 #include <iostream>
-#include <Context.hpp>
 #include <protobuf/ProtoSerializer.hpp>
 #include <modules/CarAccessoryModule.pb.h>
 
@@ -12,22 +11,24 @@ int main() {
 	if(rc != OK ) {
 		return 1;
 	}
-	auto con = (Context*)context;
 
 	CarAccessoryModule::ButtonStatus buttonStatus;
 	buttonStatus.set_ispressed(false);
 
 	auto status = protobuf::ProtoSerializer::serializeProtobufMessageToBuffer(buttonStatus);
 
-	rc = send_status(con, status, 60);
-	if(rc != OK ) {
-		return 1;
+	while (true) {
+		std::cout << ".";
+		rc = send_status(context, status, 60);
+		if(rc != OK) {
+			return 1;
+		}
 	}
 
 	free(status.data);
 
 	buffer command {};
-	rc = get_command(con, &command);
+	rc = get_command(context, &command);
 	if(rc != OK ) {
 		return 1;
 	}
@@ -37,4 +38,7 @@ int main() {
 	std::cout << commandProto.command() << std::endl;
 
 	free(command.data);
+
+	destroy_connection(&context);
+
 }

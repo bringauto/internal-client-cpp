@@ -44,7 +44,7 @@ public:
 	 * @return string containing message
 	 */
 	std::string readFromSocket();
-
+	// TODO readCommandSize, readCommand, reconnect()
 	/**
 	 * @brief Sends message in buffer and return number of bytes sent
 	 * First sends 4 bytes containing the message length, then the message in the buffer
