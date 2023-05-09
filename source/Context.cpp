@@ -13,7 +13,7 @@
 
 int Context::createConnection(const char *ipv4_address, unsigned int port) {
 	if ((socket_ = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		return -1; // Socket creation error
+		return NOT_OK; // Socket creation error
 	}
 
 	struct sockaddr_in serverAddress;
@@ -22,10 +22,10 @@ int Context::createConnection(const char *ipv4_address, unsigned int port) {
 	serverAddress.sin_port = htons(port);
 
 	if((inet_pton(AF_INET, ipv4_address, &serverAddress.sin_addr) <= 0)) {
-		return -1; // Invalid address
+		return NOT_OK; // Invalid address
 	}
 	if (connect(socket_, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
-		return -1; // Connection error
+		return NOT_OK; // Connection error
 	}
 	return OK;
 }

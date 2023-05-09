@@ -5,7 +5,7 @@
 #include <google/protobuf/util/message_differencer.h>
 
 namespace protobuf {
-struct buffer ProtoSerializer::serializeProtobufMessage(const google::protobuf::Message &protobufMessage) {
+struct buffer ProtoSerializer::serializeProtobufMessageToBuffer(const google::protobuf::Message &protobufMessage) {
 	struct buffer message {};
 	message.size_in_bytes = protobufMessage.ByteSizeLong();
 	message.data = malloc(message.size_in_bytes);
@@ -35,7 +35,7 @@ int ProtoSerializer::checkAndParseCommand(std::string *command, const std::strin
 	}
 	InternalProtocol::InternalServer internalServerMessage;
 
-	if (!internalServerMessage.ParseFromString(internalServerCommand)) {
+	if (not internalServerMessage.ParseFromString(internalServerCommand)) {
 		return COMMAND_INCORRECT;
 	}
 

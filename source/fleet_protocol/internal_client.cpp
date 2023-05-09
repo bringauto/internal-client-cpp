@@ -20,11 +20,11 @@ int init_connection(void **context, const char *const ipv4_address, unsigned por
 
 	newContext->setDevice(device);
 	auto internalConnect = protobuf::ProtoSerializer::createInternalConnect(newContext->getDevice());
-	auto connectMessage = protobuf::ProtoSerializer::serializeProtobufMessage(internalConnect);
+	auto connectMessage = protobuf::ProtoSerializer::serializeProtobufMessageToBuffer(internalConnect);
 	if (newContext->sendMessage(connectMessage) <= 0) {
 		return NOT_OK;
 	}
-
+	clear_buffer(&connectMessage);
 	std::string connectResponse = newContext->readFromSocket();
 	if (int retCode = protobuf::ProtoSerializer::checkConnectResponse(connectResponse, newContext->getDevice()) != OK) {
 		return retCode;
@@ -50,7 +50,7 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 
 	auto internalClientMessage = protobuf::ProtoSerializer::createInternalStatus(status,
 																				currentContext->getDevice());
-	struct buffer statusMessage = protobuf::ProtoSerializer::serializeProtobufMessage(internalClientMessage);
+	struct buffer statusMessage = protobuf::ProtoSerializer::serializeProtobufMessageToBuffer(internalClientMessage);
 
 	auto rc = OK;
 	auto threadStatus = std::async(std::launch::async, [&]() {
@@ -58,6 +58,7 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 			rc = NOT_OK;
 		}
 	}).wait_for(std::chrono::seconds(timeout));
+	clear_buffer(&statusMessage);
 
 	if(threadStatus == std::future_status::timeout) {
 		return TIMEOUT_OCCURRED;
@@ -83,8 +84,6 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 }
 
 int get_command(void *context, struct buffer *command) {
-	// TODO can I do realloc on the input command?
-	// napsat ze mi musi dat plne inicializovanou
 	if(context == nullptr) {
 		return CONTEXT_INCORRECT;
 	}
