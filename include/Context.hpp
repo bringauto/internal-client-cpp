@@ -64,13 +64,13 @@ public:
 	 * To get the length of the command data, use getCommandSize() function
 	 * @return pointer to char
 	 */
-	char* getCommandData() { return commandData_.get(); };
+	char* getCommandData() const { return commandData_.get(); };
 
 	/**
 	 * @brief Return length of the command data
 	 * @return Data size
 	 */
-	size_t getCommandSize() { return commandSize_; };
+	size_t getCommandSize() const { return commandSize_; };
 
 private:
 	/// Socket connected to the server
