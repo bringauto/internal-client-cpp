@@ -1,0 +1,4 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.25 FATAL_ERROR)
+
+ADD_EXECUTABLE(example main.cpp)
+TARGET_LINK_LIBRARIES(example PUBLIC internal_client_library-object)
