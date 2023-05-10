@@ -7,8 +7,8 @@ API of this implementation is based on ANSI C api proposed in fleet protocol int
 
 ## Requirements
 
-- `CMLib`
-- `CMake` >= 3.25 
+- CMLib
+- CMake [>= 3.25] 
 
 ## Usage
 >Example usage can be seen in `examples` directory.
@@ -33,8 +33,11 @@ After connection was established with server, device status can be sent. This is
 ```c++
 send_status(context, binary_payload, 30)
 ```
-Client will try to send status with provided binary payload to server.
-If no error occurs during communication and a response with command is received, it can be obtained using:
+Client will try to send status with provided binary payload to server, then will wait for a command.
+
+The timeout given to send_status is the maximum time for sending and for receiving, therefore the maximum time this function can take is `2*timeout`.
+
+If no error occurs during the communication and a response with a command is received, it can be obtained using:
 ```c++
 get_command(context, &command_buffer)
 ```
@@ -43,38 +46,39 @@ The command_buffer must be initialized before use.
 2. If the data pointer is allocated, but only for not sufficient size. The pointer will be reallocated
 3. Command data will be copied into command_buffer data pointer and the size_in_bytes will be set accordingly
 
+If the client was disconnected by the server, it will attempt to reconnect once.
+
 ### Destroying client
-After client is no longer needed, it needs to be destroyed using:
+After client is no longer needed, or an error occurred, it needs to be destroyed using:
 ```c++
 destroy_connection(&context)
 ```
->**Note**: If exception was raised during initialization or sending status, client is destroyed automatically.
 
-## Adding support for modules
-Every client is subclass of base client defined in [`InternalClient.py`](internal_client/client_lib/InternalClient.py). Module specific clients are then defined in [internal_client](internal_client/) directory. To add support for new module, follow these steps:
-1. Create client file in [internal_client](internal_client/) directory. 
-2. In this file, import `InternalClient` from `.client_lib`
-3. Create new client class as subclass of `InternalClient`. Consider using proper name, such as `{MODULE_NAME}InternalClient`, where `MODULE_NAME` is name of desired module in CapitalizedWords (e.g. `CarAccessory`).
-4. In this newly created class, specify class variable `MODULE_ID` with integer value representing value of module id.
-5. Add import of this class into [`__init__.py`](internal_client/__init__.py) to allow for better usage of this newly created module client. It is also a good idea to add name of this class into `__all__` dunder tuple for cases when some lunatic uses `import *`.
-### Module client example
-[`_mission_client.py`](internal_client/_mission_client.py)
-```python
-from .client_lib import InternalClient
-class MissionInternalClient(InternalClient):
-    MODULE_ID = 1
-
+## CMake arguments
+* BRINGAUTO_SAMPLES - configure examples
+* BRINGAUTO_INSTALL - enable install
+* BRINGAUTO_PACKAGE - Enable package generation
+* BRINGAUTO_SYSTEM_DEP - Enable system dependencies, so they won't be installed with CMLib
+  * If this option is used, all library requirements must be installed manually
+  * Library requirements:
+    * protobuf [= 3.21.12]
+  
+## Install
+To install, use the following commands:
+```shell
+$ mkdir _build && cd _build
+$ cmake -DBRINGAUTO_INSTALL=ON -DCMLIB_DIR=<path_to_cmlib> ..
+$ make install
 ```
-[definition in `__init__.py`](internal_client/__init__.py)
-```python
-__all__ = (
-    "exceptions",
-    "CarAccessoryInternalClient",
-    "MissionInternalClient" # new client
-)
-# new client
-from ._mission_client import MissionInternalClient
 
-from ._car_accessory_client import CarAccessoryInternalClient
-from .client_lib import exceptions
+## Package
+To generate packages, use the following commands:
+```shell
+$ mkdir _build && cd _build
+$ cmake -DBRINGAUTO_INSTALL=ON -DBRINGAUTO_PACKAGE=ON -DCMLIB_DIR=<path_to_cmlib> ..
+$ cpack
 ```
+
+## Include to project
+
+TODO
