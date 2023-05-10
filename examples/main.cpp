@@ -9,7 +9,7 @@ int main() {
 	void *context {};
 	int rc = init_connection(&context, "127.0.0.1", 8888, device);
 	if(rc != OK ) {
-		return 1;
+		return rc;
 	}
 
 	CarAccessoryModule::ButtonStatus buttonStatus;
@@ -17,13 +17,11 @@ int main() {
 
 	auto status = protobuf::ProtoSerializer::serializeProtobufMessageToBuffer(buttonStatus);
 
-	while (true) {
-		std::cout << ".";
-		rc = send_status(context, status, 60);
-		if(rc != OK) {
-			return 1;
-		}
+	rc = send_status(context, status, 60);
+	if(rc != OK) {
+		return rc;
 	}
+
 
 	free(status.data);
 
