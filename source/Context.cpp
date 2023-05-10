@@ -29,6 +29,10 @@ int Context::createConnection(const char *ipv4_address, unsigned int port) {
 }
 
 int Context::reconnect() {
+	close(socket_);
+	if ((socket_ = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		return NOT_OK; // Socket creation error
+	}
 	if (connect(socket_, (struct sockaddr*)&serverAddress_, sizeof(serverAddress_)) < 0) {
 		return NOT_OK; // Connection error
 	}

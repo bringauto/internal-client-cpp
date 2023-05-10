@@ -1,4 +1,5 @@
 #include <Context.hpp>
+#include <Communication.hpp>
 #include <protobuf/ProtoSerializer.hpp>
 #include <helpers/EnumMappers.hpp>
 
@@ -20,19 +21,12 @@ int init_connection(void **context, const char *const ipv4_address, unsigned por
 	*context = newContext;
 
 	newContext->setDevice(device);
-	auto internalConnect = protobuf::ProtoSerializer::createInternalConnect(newContext->getDevice());
-	auto connectMessage = protobuf::ProtoSerializer::serializeProtobufMessageToBuffer(internalConnect);
-	if (newContext->sendMessage(connectMessage) <= 0) {
+
+	if (Communication::sendConnectMessage(newContext) == OK) {
+		return Communication::readConnectResponse(newContext);
+	} else {
 		return NOT_OK;
 	}
-	clear_buffer(&connectMessage);
-
-	auto size = newContext->readSizeFromSocket();
-	std::string connectResponse = newContext->readMessageFromSocket(size);
-	if (int retCode = protobuf::ProtoSerializer::checkConnectResponse(connectResponse, newContext->getDevice()) != OK) {
-		return retCode;
-	}
-	return helpers::EnumMappers::ConnectResponseToInternalClientCode(connectResponse);
 }
 
 int destroy_connection(void **context) {
@@ -74,17 +68,7 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 	threadStatus = std::async(std::launch::async, [&]() {
 		uint32_t commandSize = currentContext->readSizeFromSocket();
 		if (commandSize == 0) { 	// Begin reconnect sequence
-			if(currentContext->reconnect() == OK) {
-				if(currentContext->sendMessage(statusMessage) <= 0) {
-					rc = NOT_OK;
-				}
-				commandSize = currentContext->readSizeFromSocket();
-				if (commandSize == 0) {
-					rc = NOT_OK;
-				}
-			} else {
-				rc = UNABLE_TO_CONNECT;
-			}
+			rc = Communication::startReconnectSequence(currentContext, statusMessage, &commandSize);
 		}
 		if (rc == OK) {
 			internalServerMessageString = currentContext->readMessageFromSocket(commandSize);
