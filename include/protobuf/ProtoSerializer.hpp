@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory_management.h>
-
 #include <InternalProtocol.pb.h>
 
 namespace protobuf {

@@ -1,14 +1,14 @@
 #include <Context.hpp>
 
+#include <memory_management.h>
+#include <ic_error_codes.h>
+#include <internal_client.h>
+#include <google/protobuf/util/message_differencer.h>
+
 #include <sys/socket.h>
 #include <iostream>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <google/protobuf/util/message_differencer.h>
-
-#include <memory_management.h>
-#include <general_error_codes.h>
-#include <internal_client.h>
 
 
 int Context::createConnection(const char *ipv4_address, unsigned int port) {
@@ -16,15 +16,20 @@ int Context::createConnection(const char *ipv4_address, unsigned int port) {
 		return NOT_OK; // Socket creation error
 	}
 
-	struct sockaddr_in serverAddress;
+	serverAddress_.sin_family = AF_INET;
+	serverAddress_.sin_port = htons(port);
 
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(port);
-
-	if((inet_pton(AF_INET, ipv4_address, &serverAddress.sin_addr) <= 0)) {
+	if((inet_pton(AF_INET, ipv4_address, &serverAddress_.sin_addr) <= 0)) {
 		return NOT_OK; // Invalid address
 	}
-	if (connect(socket_, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
+	if (connect(socket_, (struct sockaddr*)&serverAddress_, sizeof(serverAddress_)) < 0) {
+		return NOT_OK; // Connection error
+	}
+	return OK;
+}
+
+int Context::reconnect() {
+	if (connect(socket_, (struct sockaddr*)&serverAddress_, sizeof(serverAddress_)) < 0) {
 		return NOT_OK; // Connection error
 	}
 	return OK;
@@ -40,7 +45,7 @@ void Context::setDevice(struct device_identification device) {
 
 
 
-size_t Context::sendMessage(struct buffer message) {
+size_t Context::sendMessage(struct buffer message) const {
 	if(send(socket_, &message.size_in_bytes, sizeof(uint32_t), 0) != headerSize_) {
 		return NOT_OK;
 	}
@@ -49,12 +54,15 @@ size_t Context::sendMessage(struct buffer message) {
 	return bytesSent;
 }
 
-// TODO split into readSize, readCommand. In readSize i can reconnect
-std::string Context::readFromSocket() {
+uint32_t Context::readSizeFromSocket() const {
 	uint32_t commandSize;
 	if (recv(socket_, &commandSize, sizeof(uint32_t), 0) != sizeof(uint32_t)) {
-		return "";
+		return 0;
 	}
+	return commandSize;
+}
+
+std::string Context::readCommandFromSocket(uint32_t commandSize) const {
 	auto buffer = std::make_unique<char[]>(commandSize);
 
 	int rc = recv(socket_, buffer.get(), commandSize, 0);
@@ -74,5 +82,8 @@ void Context::saveCommand(const std::string &command) {
 Context::~Context() {
 	close(socket_);
 }
+
+
+
 
 

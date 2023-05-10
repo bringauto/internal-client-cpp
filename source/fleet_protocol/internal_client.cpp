@@ -1,7 +1,8 @@
-#include <internal_client.h>
 #include <Context.hpp>
 #include <protobuf/ProtoSerializer.hpp>
 #include <helpers/EnumMappers.hpp>
+
+#include <internal_client.h>
 
 #include <thread>
 #include <future>
@@ -25,7 +26,7 @@ int init_connection(void **context, const char *const ipv4_address, unsigned por
 		return NOT_OK;
 	}
 	clear_buffer(&connectMessage);
-	std::string connectResponse = newContext->readFromSocket();
+	std::string connectResponse = newContext->readCommandFromSocket(0);
 	if (int retCode = protobuf::ProtoSerializer::checkConnectResponse(connectResponse, newContext->getDevice()) != OK) {
 		return retCode;
 	}
@@ -52,27 +53,48 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 																				currentContext->getDevice());
 	struct buffer statusMessage = protobuf::ProtoSerializer::serializeProtobufMessageToBuffer(internalClientMessage);
 
-	auto rc = OK;
+	int rc = OK;
 	auto threadStatus = std::async(std::launch::async, [&]() {
 		if(currentContext->sendMessage(statusMessage) <= 0) {
 			rc = NOT_OK;
 		}
 	}).wait_for(std::chrono::seconds(timeout));
-	clear_buffer(&statusMessage);
 
 	if(threadStatus == std::future_status::timeout) {
+		clear_buffer(&statusMessage);
 		return TIMEOUT_OCCURRED;
 	} else if(rc == NOT_OK) {
+		clear_buffer(&statusMessage);
 		return NOT_OK;
 	}
 
 	std::string internalServerMessageString {};
 	threadStatus = std::async(std::launch::async, [&]() {
-		internalServerMessageString = currentContext->readFromSocket();
+		uint32_t commandSize = currentContext->readSizeFromSocket();
+		if (commandSize == 0) { 	// Begin reconnect sequence
+			if(currentContext->reconnect() == OK) {
+				if(currentContext->sendMessage(statusMessage) <= 0) {
+					rc = NOT_OK;
+				}
+				commandSize = currentContext->readSizeFromSocket();
+				if (commandSize == 0) {
+					rc = NOT_OK;
+				}
+			} else {
+				rc = UNABLE_TO_CONNECT;
+			}
+		}
+		if (rc == OK) {
+			internalServerMessageString = currentContext->readCommandFromSocket(commandSize);
+		}
 	}).wait_for(std::chrono::seconds(timeout));
+
+	clear_buffer(&statusMessage);
 
 	if(threadStatus == std::future_status::timeout) {
 		return TIMEOUT_OCCURRED;
+	} else if (rc != OK) {
+		return rc;
 	}
 
 	std::string command {};

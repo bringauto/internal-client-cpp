@@ -1,9 +1,11 @@
 #pragma once
 
 #include <device_management.h>
-#include <InternalProtocol.pb.h>
 #include <memory_management.h>
+#include <InternalProtocol.pb.h>
+
 #include <condition_variable>
+#include <netinet/in.h>
 
 
 
@@ -21,9 +23,12 @@ public:
 	int createConnection(const char *ipv4_address, unsigned port);
 
 	/**
-	 * @brief Closes socket
+	 * @brief Reconnects socket to server
+	 *
+	 * @return OK if reconnect was successful
+	 * @return NOT_OK if and error occurred
 	 */
-	~Context();
+	int reconnect();
 
 	/**
 	 * @brief Set device
@@ -38,20 +43,28 @@ public:
 	InternalProtocol::Device getDevice() { return device_; }
 
 	/**
+	 * @brief Reads 4 bytes, that contains the length of a message that follows it in socket
+	 *
+	 * @return size in bytes of the next message
+	 */
+	uint32_t readSizeFromSocket() const;
+
+	/**
 	 * @brief Reads from message from socket
-	 * First reads 4 bytes, that contains the length of the message that can be read
-	 * Then reads the message and saves it to a string
+	 * Reads number of bytes given by parameter from socket and saves it to a string
+	 *
+	 * @param commandSize number of bytes to read
 	 * @return string containing message
 	 */
-	std::string readFromSocket();
-	// TODO readCommandSize, readCommand, reconnect()
+	std::string readCommandFromSocket(uint32_t commandSize) const;
+
 	/**
 	 * @brief Sends message in buffer and return number of bytes sent
 	 * First sends 4 bytes containing the message length, then the message in the buffer
 	 * @param message buffer containing message that will be sent
 	 * @return number of bytes sent
 	 */
-	size_t sendMessage(struct buffer message);
+	size_t sendMessage(struct buffer message) const;
 
 	/**
 	 * @brief Save commandData
@@ -72,9 +85,16 @@ public:
 	 */
 	size_t getCommandSize() const { return commandSize_; };
 
+	/**
+	 * @brief Closes socket
+	 */
+	~Context();
+
 private:
 	/// Socket connected to the server
 	int socket_ { -1};
+	/// Server address saved for reconnecting
+	struct sockaddr_in serverAddress_;
 	/// Protobuf Device message
 	InternalProtocol::Device device_ {};
 	/// Command data pointer
