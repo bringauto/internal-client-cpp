@@ -26,7 +26,9 @@ int init_connection(void **context, const char *const ipv4_address, unsigned por
 		return NOT_OK;
 	}
 	clear_buffer(&connectMessage);
-	std::string connectResponse = newContext->readCommandFromSocket(0);
+
+	auto size = newContext->readSizeFromSocket();
+	std::string connectResponse = newContext->readMessageFromSocket(size);
 	if (int retCode = protobuf::ProtoSerializer::checkConnectResponse(connectResponse, newContext->getDevice()) != OK) {
 		return retCode;
 	}
@@ -85,7 +87,7 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 			}
 		}
 		if (rc == OK) {
-			internalServerMessageString = currentContext->readCommandFromSocket(commandSize);
+			internalServerMessageString = currentContext->readMessageFromSocket(commandSize);
 		}
 	}).wait_for(std::chrono::seconds(timeout));
 

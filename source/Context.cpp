@@ -62,7 +62,7 @@ uint32_t Context::readSizeFromSocket() const {
 	return commandSize;
 }
 
-std::string Context::readCommandFromSocket(uint32_t commandSize) const {
+std::string Context::readMessageFromSocket(uint32_t commandSize) const {
 	auto buffer = std::make_unique<char[]>(commandSize);
 
 	int rc = recv(socket_, buffer.get(), commandSize, 0);

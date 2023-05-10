@@ -54,9 +54,9 @@ public:
 	 * Reads number of bytes given by parameter from socket and saves it to a string
 	 *
 	 * @param commandSize number of bytes to read
-	 * @return string containing message
+	 * @return string containing the message
 	 */
-	std::string readCommandFromSocket(uint32_t commandSize) const;
+	std::string readMessageFromSocket(uint32_t commandSize) const;
 
 	/**
 	 * @brief Sends message in buffer and return number of bytes sent
