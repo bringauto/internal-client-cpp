@@ -9,6 +9,7 @@ int main() {
 	void *context {};
 	int rc = init_connection(&context, "127.0.0.1", 8888, device);
 	if(rc != OK ) {
+		destroy_connection(&context);
 		return rc;
 	}
 
@@ -19,6 +20,7 @@ int main() {
 
 	rc = send_status(context, status, 60);
 	if(rc != OK) {
+		destroy_connection(&context);
 		return rc;
 	}
 
@@ -28,6 +30,7 @@ int main() {
 	buffer command {};
 	rc = get_command(context, &command);
 	if(rc != OK ) {
+		destroy_connection(&context);
 		return 1;
 	}
 

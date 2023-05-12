@@ -15,6 +15,7 @@ int init_connection(void **context, const char *const ipv4_address, unsigned por
 	auto newContext = new Context();
 
 	if(newContext->createConnection(ipv4_address, port) != OK) {
+		delete newContext;
 		return UNABLE_TO_CONNECT;
 	}
 
