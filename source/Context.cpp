@@ -9,6 +9,7 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 
 int Context::createConnection(const char *ipv4_address, unsigned int port) {
