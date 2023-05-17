@@ -78,7 +78,3 @@ $ mkdir _build && cd _build
 $ cmake -DBRINGAUTO_INSTALL=ON -DBRINGAUTO_PACKAGE=ON -DCMLIB_DIR=<path_to_cmlib> ..
 $ cpack
 ```
-
-## Include to project
-
-TODO
