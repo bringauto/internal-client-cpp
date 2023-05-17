@@ -52,10 +52,10 @@ void Context::setDevice(struct device_identification device) {
 
 size_t Context::sendMessage(struct buffer message) const {
 	if(send(socket_, &message.size_in_bytes, sizeof(uint32_t), 0) != headerSize_) {
-		return NOT_OK;
+		return 0;
 	}
 	size_t bytesSent = send(socket_, message.data, message.size_in_bytes,  MSG_NOSIGNAL);
-	// Flag MSG_NOSIGNAL prevents the socket form sending signal SIGPIPE. This only works on Linux and must be changed for other platforms
+	/// Flag MSG_NOSIGNAL prevents the socket form sending signal SIGPIPE. This only works on Unix and must be changed for other platforms
 	return bytesSent;
 }
 

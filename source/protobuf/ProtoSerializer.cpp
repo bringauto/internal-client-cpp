@@ -7,10 +7,9 @@
 namespace protobuf {
 struct buffer ProtoSerializer::serializeProtobufMessageToBuffer(const google::protobuf::Message &protobufMessage) {
 	struct buffer message {};
-	message.size_in_bytes = protobufMessage.ByteSizeLong();
-	message.data = malloc(message.size_in_bytes);
-	protobufMessage.SerializeToArray(message.data, message.size_in_bytes);
-
+	if ((allocate(&message, protobufMessage.ByteSizeLong())) == OK) {
+			protobufMessage.SerializeToArray(message.data, (int)message.size_in_bytes);
+	}
 	return message;
 }
 

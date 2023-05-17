@@ -10,7 +10,7 @@ int Communication::sendConnectMessage(Context *context) {
 	if (context->sendMessage(connectMessage) <= 0) {
 		return NOT_OK;
 	}
-	clear_buffer(&connectMessage);
+	deallocate(&connectMessage);
 	return OK;
 }
 

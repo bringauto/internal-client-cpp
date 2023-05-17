@@ -14,7 +14,7 @@ int init_connection(void **context, const char *const ipv4_address, unsigned por
 					const struct device_identification device) {
 	auto newContext = new Context();
 
-	if(newContext->createConnection(ipv4_address, port) != OK) {
+	if (newContext->createConnection(ipv4_address, port) != OK) {
 		delete newContext;
 		return UNABLE_TO_CONNECT;
 	}
@@ -31,7 +31,7 @@ int init_connection(void **context, const char *const ipv4_address, unsigned por
 }
 
 int destroy_connection(void **context) {
-	if(*context == nullptr) {
+	if (*context == nullptr) {
 		return NOT_OK;
 	}
 	auto currentContext = (Context **)context;
@@ -41,34 +41,37 @@ int destroy_connection(void **context) {
 }
 
 int send_status(void *context, const struct buffer status, unsigned timeout) {
-	if(context == nullptr) {
+	if (context == nullptr) {
 		return CONTEXT_INCORRECT;
+	}
+	if (status.size_in_bytes == 0) {
+		return NOT_OK;
 	}
 	auto currentContext = (Context *)context;
 
 	auto internalClientMessage = protobuf::ProtoSerializer::createInternalStatus(status,
-																				currentContext->getDevice());
+																				 currentContext->getDevice());
 	struct buffer statusMessage = protobuf::ProtoSerializer::serializeProtobufMessageToBuffer(internalClientMessage);
 
 	int rc = OK;
 	auto threadStatus = std::async(std::launch::async, [&]() {
-		if(currentContext->sendMessage(statusMessage) <= 0) {
+		if (currentContext->sendMessage(statusMessage) <= 0) {
 			rc = NOT_OK;
 		}
 	}).wait_for(std::chrono::seconds(timeout));
 
-	if(threadStatus == std::future_status::timeout) {
-		clear_buffer(&statusMessage);
+	if (threadStatus == std::future_status::timeout) {
+		deallocate(&statusMessage);
 		return TIMEOUT_OCCURRED;
-	} else if(rc == NOT_OK) {
-		clear_buffer(&statusMessage);
+	} else if (rc == NOT_OK) {
+		deallocate(&statusMessage);
 		return NOT_OK;
 	}
 
 	std::string internalServerMessageString {};
 	threadStatus = std::async(std::launch::async, [&]() {
 		uint32_t commandSize = currentContext->readSizeFromSocket();
-		if (commandSize == 0) { 	// Begin reconnect sequence
+		if (commandSize == 0) {    // Begin reconnect sequence
 			rc = Communication::startReconnectSequence(currentContext, statusMessage, &commandSize);
 		}
 		if (rc == OK) {
@@ -76,16 +79,17 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 		}
 	}).wait_for(std::chrono::seconds(timeout));
 
-	clear_buffer(&statusMessage);
+	deallocate(&statusMessage);
 
-	if(threadStatus == std::future_status::timeout) {
+	if (threadStatus == std::future_status::timeout) {
 		return TIMEOUT_OCCURRED;
 	} else if (rc != OK) {
 		return rc;
 	}
 
 	std::string command {};
-	if(protobuf::ProtoSerializer::checkAndParseCommand(&command, internalServerMessageString, currentContext->getDevice()) == NOT_OK) {
+	if (protobuf::ProtoSerializer::checkAndParseCommand(&command, internalServerMessageString,
+														currentContext->getDevice()) == NOT_OK) {
 		return COMMAND_INCORRECT;
 	}
 	currentContext->saveCommand(command);
@@ -93,18 +97,18 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 }
 
 int get_command(void *context, struct buffer *command) {
-	if(context == nullptr) {
+	if (context == nullptr) {
 		return CONTEXT_INCORRECT;
 	}
 	auto currentContext = (Context *)context;
 
 	auto newCommandSize = currentContext->getCommandSize();
-	if(command->size_in_bytes <= 0) {
+	if (command->size_in_bytes <= 0) {
 		return NO_COMMAND_AVAILABLE;
 	}
 
 	if (command->size_in_bytes == 0) {
-		if ((command->data = malloc(newCommandSize)) == nullptr) {
+		if (allocate(command, newCommandSize) == NOT_OK) {
 			return NOT_OK;
 		}
 	} else if (command->size_in_bytes > 0 && command->data == nullptr) {
@@ -113,8 +117,8 @@ int get_command(void *context, struct buffer *command) {
 		if ((command->data = realloc(command->data, newCommandSize)) == nullptr) {
 			return NOT_OK;
 		}
+		command->size_in_bytes = newCommandSize;
 	}
 	std::memcpy(command->data, currentContext->getCommandData(), newCommandSize);
-	command->size_in_bytes = newCommandSize;
 	return OK;
 }

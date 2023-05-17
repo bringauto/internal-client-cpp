@@ -3,6 +3,8 @@
 #include <Context.hpp>
 #include <protobuf/ProtoSerializer.hpp>
 
+#include <memory_management.h>
+
 class Communication {
 public:
 	/**
