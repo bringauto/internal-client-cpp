@@ -44,7 +44,7 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 	if (context == nullptr) {
 		return CONTEXT_INCORRECT;
 	}
-	if (status.size_in_bytes == 0) {
+	if (status.data == nullptr) {
 		return NOT_OK;
 	}
 	auto currentContext = (Context *)context;
@@ -88,7 +88,7 @@ int send_status(void *context, const struct buffer status, unsigned timeout) {
 	}
 
 	std::string command {};
-	if (protobuf::ProtoSerializer::checkAndParseCommand(&command, internalServerMessageString,
+	if (protobuf::ProtoSerializer::checkAndParseCommand(command, internalServerMessageString,
 														currentContext->getDevice()) == NOT_OK) {
 		return COMMAND_INCORRECT;
 	}

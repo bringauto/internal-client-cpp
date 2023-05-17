@@ -65,7 +65,7 @@ public:
 	 * @return COMMAND_INCORRECT if message cannot be parsed or doesn't contain Device Command
 	 * @return NOT_OK if message is empty
 	 */
-	static int checkAndParseCommand(std::string *command, const std::string &internalServerCommand,
+	static int checkAndParseCommand(std::string &command, const std::string &internalServerCommand,
 									const InternalProtocol::Device& device);
 
 };

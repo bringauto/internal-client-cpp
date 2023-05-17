@@ -27,7 +27,7 @@ ProtoSerializer::createInternalStatus(const struct buffer &statusData, const Int
 }
 
 
-int ProtoSerializer::checkAndParseCommand(std::string *command, const std::string &internalServerCommand,
+int ProtoSerializer::checkAndParseCommand(std::string &command, const std::string &internalServerCommand,
 										  const InternalProtocol::Device& device) {
 	if(internalServerCommand.empty()) {
 		return NOT_OK;
@@ -42,10 +42,8 @@ int ProtoSerializer::checkAndParseCommand(std::string *command, const std::strin
 		if(not internalServerMessage.devicecommand().has_device() || google::protobuf::util::MessageDifferencer::Equals(internalServerMessage.devicecommand().device(), device)) {
 			return DEVICE_INCORRECT;
 		}
-
 		auto commandSize = internalServerMessage.devicecommand().commanddata().length();
-		command->resize(commandSize);
-		std::memcpy(&command[0], internalServerMessage.devicecommand().commanddata().data(), commandSize);
+		command.assign(internalServerMessage.devicecommand().commanddata().data(), commandSize);
 
 		return OK;
 	} else {

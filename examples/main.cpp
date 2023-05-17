@@ -14,7 +14,7 @@ int main() {
 	}
 
 	CarAccessoryModule::ButtonStatus buttonStatus;
-	buttonStatus.set_ispressed(false);
+	buttonStatus.set_ispressed(true);
 
 	auto status = protobuf::ProtoSerializer::serializeProtobufMessageToBuffer(buttonStatus);
 
