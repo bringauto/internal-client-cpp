@@ -25,7 +25,7 @@ int main() {
 	}
 
 
-	free(status.data);
+	deallocate(&status);
 
 	buffer command {};
 	rc = get_command(context, &command);
@@ -38,7 +38,7 @@ int main() {
 	commandProto.ParseFromArray(command.data, command.size_in_bytes);
 	std::cout << commandProto.command() << std::endl;
 
-	free(command.data);
+	deallocate(&command);
 
 	destroy_connection(&context);
 
