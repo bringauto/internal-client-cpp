@@ -24,26 +24,21 @@ int Communication::readConnectResponse(Context *context) {
 }
 
 int Communication::startReconnectSequence(Context *context, struct buffer statusMessage, uint32_t *nextMessageSize) {
-	if(context->reconnect() == OK) {
-		if (Communication::sendConnectMessage(context) == OK) {
-			if (Communication::readConnectResponse(context) == OK) {
-				if(context->sendMessage(statusMessage) <= 0) {
-					return NOT_OK;
-				}
-				*nextMessageSize = context->readSizeFromSocket();
-				if (*nextMessageSize == 0) {
-					return NOT_OK;
-				}
-			} else {
-				return UNABLE_TO_CONNECT;
-			}
-		} else {
-			return UNABLE_TO_CONNECT;
-		}
-	} else {
+	if(context->reconnect() != OK) {
 		return UNABLE_TO_CONNECT;
 	}
-	return OK;
+	if (Communication::sendConnectMessage(context) != OK) {
+		return UNABLE_TO_CONNECT;
+	}
+	if (Communication::readConnectResponse(context) == OK) {
+		return UNABLE_TO_CONNECT;
+	}
+	if(context->sendMessage(statusMessage) <= 0) {
+		return NOT_OK;
+	}
+	*nextMessageSize = context->readSizeFromSocket();
+	return *nextMessageSize == 0 ? NOT_OK : OK;
+
 }
 
 
