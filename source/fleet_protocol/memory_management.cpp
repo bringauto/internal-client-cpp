@@ -6,10 +6,10 @@
 
 
 int allocate(struct buffer *buffer_pointer, size_t size_in_bytes) {
-	buffer_pointer->size_in_bytes = size_in_bytes;
 	if ((buffer_pointer->data = malloc(size_in_bytes)) == nullptr) {
 		return NOT_OK;
 	}
+	buffer_pointer->size_in_bytes = size_in_bytes;
 	return OK;
 
 }
