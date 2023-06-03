@@ -78,3 +78,13 @@ $ mkdir _build && cd _build
 $ cmake -DBRINGAUTO_INSTALL=ON -DBRINGAUTO_PACKAGE=ON -DCMLIB_DIR=<path_to_cmlib> ..
 $ cpack
 ```
+
+## Include library
+After the library is installed, it can be included to a project by using the following lines in CMakeLists.txt
+```cmake
+FIND_PACKAGE(internal-client REQUIRED)
+TARGET_LINK_LIBRARIES(<target> PUBLIC internal_client_library-shared)
+```
+
+And then including header file `internal_client.h` to the source code.
+

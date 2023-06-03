@@ -5,6 +5,7 @@ SET(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
 
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_EXTENSIONS OFF)   # For increased portability
+SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 SET(INTERNAL_CLIENT_VERSION 1.0.0)
 
@@ -44,6 +45,9 @@ CMDEF_ADD_LIBRARY(
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_LIST_DIR}/lib/fleet-protocol)
 
 TARGET_LINK_LIBRARIES(internal_client_library-object PUBLIC fleet-protocol::internal_client_interface fleet-protocol::protobuf_cpp)
+
+TARGET_LINK_LIBRARIES(internal_client_library-shared PUBLIC fleet-protocol::internal_client_interface)
+TARGET_LINK_LIBRARIES(internal_client_library-shared PRIVATE fleet-protocol::protobuf_cpp)
 
 IF (BRINGAUTO_INSTALL)
     INCLUDE(GNUInstallDirs)
