@@ -17,7 +17,8 @@ int Communication::sendConnectMessage(Context *context) {
 int Communication::readConnectResponse(Context *context) {
 	auto size = context->readSizeFromSocket();
 	std::string connectResponse = context->readMessageFromSocket(size);
-	if (int retCode = protobuf::ProtoSerializer::checkConnectResponse(connectResponse, context->getDevice()) != OK) {
+	int retCode = protobuf::ProtoSerializer::checkConnectResponse(connectResponse, context->getDevice());
+	if (retCode != OK) {
 		return retCode;
 	}
 	return helpers::EnumMappers::ConnectResponseToInternalClientCode(connectResponse);

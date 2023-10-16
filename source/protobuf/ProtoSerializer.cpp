@@ -39,7 +39,7 @@ int ProtoSerializer::checkAndParseCommand(std::string &command, const std::strin
 	}
 
 	if (internalServerMessage.has_devicecommand()) {
-		if(not internalServerMessage.devicecommand().has_device() || google::protobuf::util::MessageDifferencer::Equals(internalServerMessage.devicecommand().device(), device)) {
+		if(not internalServerMessage.devicecommand().has_device() || not google::protobuf::util::MessageDifferencer::Equals(internalServerMessage.devicecommand().device(), device)) {
 			return DEVICE_INCORRECT;
 		}
 		auto commandSize = internalServerMessage.devicecommand().commanddata().length();
@@ -73,7 +73,7 @@ int ProtoSerializer::checkConnectResponse(const std::string &internalServerConne
 
 	if (internalServerMessage.has_deviceconnectresponse()) {
 		const auto& deviceConnectResponse = internalServerMessage.deviceconnectresponse();
-		if(google::protobuf::util::MessageDifferencer::Equals(deviceConnectResponse.device(),
+		if(not deviceConnectResponse.has_device() || not google::protobuf::util::MessageDifferencer::Equals(deviceConnectResponse.device(),
 															  device)) {
 			return DEVICE_INCORRECT;
 		}
