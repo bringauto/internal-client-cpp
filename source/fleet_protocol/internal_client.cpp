@@ -9,7 +9,6 @@
 #include <future>
 
 
-
 int init_connection(void **context, const char *const ipv4_address, unsigned port,
 					const struct device_identification device) {
 	auto newContext = new Context();
@@ -103,7 +102,7 @@ int get_command(void *context, struct buffer *command) {
 	auto currentContext = (Context *)context;
 
 	auto newCommandSize = currentContext->getCommandSize();
-	if (command->size_in_bytes <= 0) {
+	if (newCommandSize <= 0) {
 		return NO_COMMAND_AVAILABLE;
 	}
 
