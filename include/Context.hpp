@@ -81,9 +81,9 @@ public:
 
 	/**
 	 * @brief Return length of the command data
-	 * @return Data size
+	 * @return Data size, -1 if no command is available
 	 */
-	size_t getCommandSize() const { return commandSize_; };
+	int64_t getCommandSize() const { return commandSize_; };
 
 	/**
 	 * @brief Closes socket
@@ -100,7 +100,7 @@ private:
 	/// Command data pointer
 	std::unique_ptr<char[]> commandData_ {};
 	/// Size of commandData_
-	size_t commandSize_ { 0 };
+	int64_t commandSize_ { -1 };
 
 	/// Size of message header, where the length of the message is set
 	static constexpr short headerSize_ { 4 };

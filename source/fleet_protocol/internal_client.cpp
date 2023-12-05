@@ -102,7 +102,7 @@ int get_command(void *context, struct buffer *command) {
 	auto currentContext = (Context *)context;
 
 	auto newCommandSize = currentContext->getCommandSize();
-	if (newCommandSize <= 0) {
+	if (newCommandSize < 0) {
 		return NO_COMMAND_AVAILABLE;
 	}
 
