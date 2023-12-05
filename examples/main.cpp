@@ -1,6 +1,5 @@
 #include <internal_client.h>
 #include <iostream>
-#include <protobuf/ProtoSerializer.hpp>
 #include <modules/CarAccessoryModule.pb.h>
 
 
