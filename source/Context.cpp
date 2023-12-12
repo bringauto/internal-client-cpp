@@ -42,9 +42,9 @@ int Context::reconnect() {
 
 void Context::setDevice(struct device_identification device) {
 	device_.set_module(InternalProtocol::Device::Module(device.module));
-	device_.set_devicerole(device.device_role);
+	device_.set_devicerole(std::string(static_cast<const char *>(device.device_role.data), device.device_role.size_in_bytes));
 	device_.set_devicetype(device.device_type);
-	device_.set_devicename(device.device_name);
+	device_.set_devicename(std::string(static_cast<const char *>(device.device_name.data), device.device_name.size_in_bytes));
 	device_.set_priority(device.priority);
 }
 
