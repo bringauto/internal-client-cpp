@@ -1,14 +1,29 @@
 #include <internal_client.h>
+#include <memory_management.h>
 #include <iostream>
 #include <modules/CarAccessoryModule.pb.h>
 
 
 int main() {
-	struct device_identification device {2, 0, "button", "example_button", 0};
+
+	std::string deviceRole = "example_button";
+	std::string deviceName = "button";
+	buffer deviceRoleBuffer {};
+	allocate(&deviceRoleBuffer, deviceRole.length());
+	std::memcpy(deviceRoleBuffer.data, deviceRole.c_str(), deviceRoleBuffer.size_in_bytes);
+	buffer deviceNameBuffer {};
+	allocate(&deviceNameBuffer, deviceName.length());
+	std::memcpy(deviceNameBuffer.data, deviceName.c_str(), deviceNameBuffer.size_in_bytes);
+
+	struct device_identification device {2, 0, deviceNameBuffer, deviceRoleBuffer, 0};
 	void *context {};
 	int rc = init_connection(&context, "127.0.0.1", 8888, device);
+	deallocate(&deviceRoleBuffer);
+	deallocate(&deviceNameBuffer);
 	if(rc != OK ) {
-		destroy_connection(&context);
+		if(context != nullptr) {
+			destroy_connection(&context);
+		}
 		return rc;
 	}
 
