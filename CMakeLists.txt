@@ -40,18 +40,17 @@ CMDEF_ADD_LIBRARY(
         LIBRARY_GROUP internal-client
         TYPE SHARED
         SOURCES ${source_files}
-        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/include"
-        INSTALL_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/include"
+        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/include/"
         VERSION ${INTERNAL_CLIENT_VERSION}
 )
 
 TARGET_LINK_LIBRARIES(internal-client-shared
-        PRIVATE
-        protobuf::libprotobuf
-        fleet-protocol-interface::protobuf-cpp-interface
         PUBLIC
         fleet-protocol-interface::common-headers-interface
         fleet-protocol-interface::internal-client-interface
+        PRIVATE
+        protobuf::libprotobuf
+        fleet-protocol-interface::protobuf-cpp-interface
 )
 
 
