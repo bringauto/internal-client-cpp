@@ -1,7 +1,7 @@
 #include <protobuf/ProtoSerializer.hpp>
 
-#include <general_error_codes.h>
-#include <internal_client.h>
+#include <fleet_protocol/common_headers/general_error_codes.h>
+#include <fleet_protocol/internal_client/internal_client.h>
 #include <google/protobuf/util/message_differencer.h>
 
 namespace protobuf {

@@ -1,7 +1,7 @@
 #include <Communication.hpp>
 #include <helpers/EnumMappers.hpp>
 
-#include <ic_error_codes.h>
+#include <fleet_protocol/internal_client/error_codes.h>
 
 
 int Communication::sendConnectMessage(Context *context) {

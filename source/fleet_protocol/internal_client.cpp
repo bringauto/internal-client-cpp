@@ -3,7 +3,7 @@
 #include <protobuf/ProtoSerializer.hpp>
 #include <helpers/EnumMappers.hpp>
 
-#include <internal_client.h>
+#include <fleet_protocol/internal_client/internal_client.h>
 
 #include <thread>
 #include <future>

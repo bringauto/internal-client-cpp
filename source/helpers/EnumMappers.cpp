@@ -1,8 +1,8 @@
 #include <helpers/EnumMappers.hpp>
 
 #include <InternalProtocol.pb.h>
-#include <ic_error_codes.h>
-#include <general_error_codes.h>
+#include <fleet_protocol/internal_client/error_codes.h>
+#include <fleet_protocol/common_headers/general_error_codes.h>
 
 
 namespace helpers {
