@@ -1,8 +1,8 @@
 #include <Context.hpp>
 
-#include <memory_management.h>
-#include <ic_error_codes.h>
-#include <internal_client.h>
+#include <fleet_protocol/common_headers/memory_management.h>
+#include <fleet_protocol/internal_client/error_codes.h>
+#include <fleet_protocol/internal_client/internal_client.h>
 #include <google/protobuf/util/message_differencer.h>
 
 #include <sys/socket.h>
@@ -70,7 +70,7 @@ uint32_t Context::readSizeFromSocket() const {
 std::string Context::readMessageFromSocket(uint32_t commandSize) const {
 	auto buffer = std::make_unique<char[]>(commandSize);
 
-	int rc = recv(socket_, buffer.get(), commandSize, 0);
+	ssize_t rc = recv(socket_, buffer.get(), commandSize, 0);
 	if (rc == -1) {
 		return "";
 	}

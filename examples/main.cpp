@@ -1,7 +1,7 @@
-#include <internal_client.h>
-#include <memory_management.h>
+#include <fleet_protocol/internal_client/internal_client.h>
+#include <fleet_protocol/common_headers/memory_management.h>
 #include <iostream>
-#include <modules/CarAccessoryModule.pb.h>
+#include <cstring>
 
 
 int main() {

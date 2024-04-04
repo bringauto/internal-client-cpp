@@ -7,7 +7,7 @@ SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_EXTENSIONS OFF)   # For increased portability
 SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-SET(INTERNAL_CLIENT_VERSION 1.0.0)
+SET(INTERNAL_CLIENT_VERSION 1.1.0)
 
 OPTION(BRINGAUTO_SAMPLES OFF)
 OPTION(BRINGAUTO_TESTS "Enable tests" OFF)
@@ -32,94 +32,42 @@ IF (BRINGAUTO_PACKAGE AND NOT BRINGAUTO_INSTALL)
             )
 ENDIF ()
 
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_LIST_DIR}/lib/fleet-protocol)
-
-ADD_LIBRARY(internal_client_api INTERFACE)
-TARGET_INCLUDE_DIRECTORIES(internal_client_api INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/lib/fleet-protocol/lib/internal_client/include> $<INSTALL_INTERFACE:include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/lib/fleet-protocol/lib/common_headers/include> $<INSTALL_INTERFACE:include>
-)
+FIND_PACKAGE(fleet-protocol-interface 2.0.0 REQUIRED)
+FIND_PACKAGE(protobuf 3.21.12 REQUIRED)
 
 FILE(GLOB_RECURSE source_files "${CMAKE_CURRENT_LIST_DIR}/source/*")
+CMDEF_ADD_LIBRARY(
+        LIBRARY_GROUP internal-client
+        TYPE SHARED
+        SOURCES ${source_files}
+        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/include/"
+        VERSION ${INTERNAL_CLIENT_VERSION}
+)
 
-ADD_LIBRARY(internal_client SHARED ${source_files})
-TARGET_INCLUDE_DIRECTORIES(internal_client PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include")
-TARGET_LINK_LIBRARIES(internal_client PUBLIC internal_client_api)
-TARGET_LINK_LIBRARIES(internal_client PRIVATE protobuf_cpp)
+TARGET_LINK_LIBRARIES(internal-client-shared
+        PUBLIC
+        fleet-protocol-interface::common-headers-interface
+        fleet-protocol-interface::internal-client-interface
+        PRIVATE
+        protobuf::libprotobuf
+        fleet-protocol-interface::protobuf-cpp-interface
+)
 
 
 IF (BRINGAUTO_INSTALL)
-    INCLUDE(GNUInstallDirs)
-
-    INSTALL(TARGETS internal_client EXPORT internal_clientTargets
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib
-            RUNTIME DESTINATION bin
-            INCLUDES DESTINATION include
-    )
-
-    INSTALL(TARGETS internal_client_api EXPORT internal_clientTargets
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib
-            RUNTIME DESTINATION bin
-            INCLUDES DESTINATION include
-    )
-
-    INSTALL(
-            DIRECTORY
-            ${CMAKE_CURRENT_SOURCE_DIR}/lib/fleet-protocol/lib/common_headers/include/
-            DESTINATION include
-            COMPONENT Devel
-    )
-
-    INSTALL(
-            DIRECTORY
-            ${CMAKE_CURRENT_SOURCE_DIR}/lib/fleet-protocol/lib/internal_client/include/
-            DESTINATION include
-            COMPONENT Devel
-    )
-
-    INCLUDE(CMakePackageConfigHelpers)
-    CONFIGURE_PACKAGE_CONFIG_FILE(
-            cmake/internal_clientConfig.cmake
-            ${CMAKE_CURRENT_BINARY_DIR}/internal_client/internal_clientConfig.cmake
-            INSTALL_DESTINATION ${LIB_INSTALL_DIR}/internal_client/cmake
-    )
-
-    WRITE_BASIC_PACKAGE_VERSION_FILE(
-            "${CMAKE_CURRENT_BINARY_DIR}/internal_client/internal_clientConfigVersion.cmake"
-            VERSION ${INTERNAL_CLIENT_VERSION}
-            COMPATIBILITY SameMajorVersion
-    )
-
-    EXPORT(EXPORT internal_clientTargets
-            FILE "${CMAKE_CURRENT_BINARY_DIR}/internal_client/internal_clientTargets.cmake"
-    )
-
-    SET(ConfigPackageLocation lib/cmake/internal_client)
-    INSTALL(EXPORT internal_clientTargets
-            FILE
-            internal_clientTargets.cmake
-            DESTINATION
-            ${ConfigPackageLocation}
-    )
-
-    INSTALL(
-            FILES
-            cmake/internal_clientConfig.cmake
-            ${CMAKE_CURRENT_BINARY_DIR}/internal_client/internal_clientConfigVersion.cmake
-            DESTINATION
-            ${ConfigPackageLocation}
-            COMPONENT
-            Devel
+    CMDEF_INSTALL(
+            TARGET internal-client-shared
+            NAMESPACE internal-client-shared::
     )
 ENDIF ()
 
 IF (BRINGAUTO_PACKAGE)
+    CMDEF_PACKAGE(
+            MAIN_TARGET internal-client-shared
+            VERSION ${INTERNAL_CLIENT_VERSION}
+    )
     SET(CPACK_GENERATOR ZIP)
-    SET(CPACK_PACKAGE_CONTACT "Jakub Trubka <jakub.trubka@bringauto.com>")
-    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jakub Trubka <jakub.trubka@bringauto.com>")
-    SET(CPACK_PACKAGE_VERSION ${libbringauto_logger_VERSION})
+    SET(CPACK_PACKAGE_CONTACT "BringAuto s.r.o. <maintainers@bringauto.com>")
     INCLUDE(CPack)
 ENDIF ()
 
