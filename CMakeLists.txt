@@ -32,15 +32,25 @@ IF (BRINGAUTO_PACKAGE AND NOT BRINGAUTO_INSTALL)
             )
 ENDIF ()
 
-FIND_PACKAGE(fleet-protocol-interface 2.0.0 REQUIRED)
-FIND_PACKAGE(protobuf 3.21.12 REQUIRED)
+INCLUDE(FetchContent)
+FetchContent_Declare(
+    fp-interface
+    GIT_REPOSITORY https://github.com/bringauto/fleet-protocol.git
+    GIT_TAG        main
+)
+FetchContent_Populate(fp-interface)
 
-FILE(GLOB_RECURSE source_files "${CMAKE_CURRENT_LIST_DIR}/source/*")
+FIND_PACKAGE(fleet-protocol-interface 2.0.0 REQUIRED)
+FIND_PACKAGE(Protobuf REQUIRED)
+
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_BINARY_DIR}/_deps/fp-interface-src/protobuf/definition/InternalProtocol.proto)
+
+FILE(GLOB_RECURSE source_files "${CMAKE_CURRENT_LIST_DIR}/source/*" PROTO_SRCS)
 CMDEF_ADD_LIBRARY(
         LIBRARY_GROUP internal-client
         TYPE SHARED
         SOURCES ${source_files}
-        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/include/"
+        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/include/" PROTO_HDRS
         VERSION ${INTERNAL_CLIENT_VERSION}
 )
 
@@ -49,7 +59,7 @@ TARGET_LINK_LIBRARIES(internal-client-shared
         fleet-protocol-interface::common-headers-interface
         fleet-protocol-interface::internal-client-interface
         PRIVATE
-        protobuf::libprotobuf
+        ${Protobuf_LIBRARIES}
         fleet-protocol-interface::protobuf-cpp-interface
 )
 
