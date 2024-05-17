@@ -31,7 +31,7 @@ int Communication::startReconnectSequence(Context *context, struct buffer status
 	if (Communication::sendConnectMessage(context) != OK) {
 		return UNABLE_TO_CONNECT;
 	}
-	if (Communication::readConnectResponse(context) == OK) {
+	if (Communication::readConnectResponse(context) != OK) {
 		return UNABLE_TO_CONNECT;
 	}
 	if(context->sendMessage(statusMessage) <= 0) {
