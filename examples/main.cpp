@@ -59,19 +59,17 @@ int connectToInternalClient(void **context, const std::string &deviceRole, const
      * @brief Represents the identification information of a device.
      *
      * This struct contains the following parameters:
-     * - `ioModuleNumber`: The I/O module number, which is `2`.
-     * - `deviceTypeNumber`: The number representing the device type, which is `4`.
+     * - `moduleNumber`: The number of the module that communicates with the device. In this case, an IO module with
+     * the number `2` is used.
+     * - `deviceTypeNumber`: The number representing the device type. In this case, a button with the number
+     * `4` is used.
      * - `deviceNameBuffer`: A buffer that holds the name of the device.
      * - `deviceRoleBuffer`: A buffer that holds the role of the device.
      * - `devicePriority`: An integer representing the device's priority, with a default value of `0`.
      */
     struct device_identification device
     {
-        2, // ioModuleNumber
-            4, // deviceTypeNumber
-            deviceNameBuffer, // deviceNameBuffer
-            deviceRoleBuffer, // deviceRoleBuffer
-            0 // devicePriority
+        2, 4, deviceNameBuffer, deviceRoleBuffer, 0
     };
 
     int rc = init_connection(context, ip.c_str(), port, device);
@@ -82,7 +80,7 @@ int connectToInternalClient(void **context, const std::string &deviceRole, const
 }
 
 /**
- * Sends the status message to the specified context.
+ * Sends the status to the specified context.
  *
  * @param context A pointer to the context.
  * @param message The status message to send.
@@ -148,7 +146,7 @@ int main()
     {
         return rc;
     }
-    // The module gateway may return a "null" value if no command is available.
+    // The module gateway may return a "null" string if no command is available.
     std::cout << "received command: " << commandString << std::endl;
 
     return 0;
