@@ -20,7 +20,7 @@ int handleRc(int rc, void **context)
 {
     if (rc != OK)
     {
-        if (*context != nullptr)
+        if (*context)
         {
             destroy_connection(context);
             *context = nullptr;
