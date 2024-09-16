@@ -51,6 +51,7 @@ TARGET_LINK_LIBRARIES(internal-client-shared
         PRIVATE
         protobuf::libprotobuf
         fleet-protocol-interface::protobuf-cpp-interface
+
 )
 
 
@@ -73,4 +74,9 @@ ENDIF ()
 
 IF (BRINGAUTO_SAMPLES)
     ADD_SUBDIRECTORY(${CMAKE_CURRENT_LIST_DIR}/examples/)
+    
+    FIND_PACKAGE(nlohmann_json 3.2.0 REQUIRED)
+    TARGET_LINK_LIBRARIES(example PUBLIC nlohmann_json::nlohmann_json)
+
+
 ENDIF ()
