@@ -53,9 +53,25 @@ int connectToInternalClient(void **context, const std::string &deviceRole, const
     buffer deviceNameBuffer{};
     allocate(&deviceNameBuffer, deviceName.length());
     std::memcpy(deviceNameBuffer.data, deviceName.c_str(), deviceNameBuffer.size_in_bytes);
+
+    /**
+     * @struct device_identification
+     * @brief Represents the identification information of a device.
+     *
+     * This struct contains the following parameters:
+     * - `ioModuleNumber`: The I/O module number, which is `2`.
+     * - `deviceTypeNumber`: The number representing the device type, which is `4`.
+     * - `deviceNameBuffer`: A buffer that holds the name of the device.
+     * - `deviceRoleBuffer`: A buffer that holds the role of the device.
+     * - `devicePriority`: An integer representing the device's priority, with a default value of `0`.
+     */
     struct device_identification device
     {
-        2, 4, deviceNameBuffer, deviceRoleBuffer, 0
+        2, // ioModuleNumber
+            4, // deviceTypeNumber
+            deviceNameBuffer, // deviceNameBuffer
+            deviceRoleBuffer, // deviceRoleBuffer
+            0 // devicePriority
     };
 
     int rc = init_connection(context, ip.c_str(), port, device);
@@ -74,6 +90,7 @@ int connectToInternalClient(void **context, const std::string &deviceRole, const
  */
 int sendStatus(void *context, bool message)
 {
+    // Structure of the command json message is dependent on the device type
     nlohmann::json jsonArray = nlohmann::json::array();
     nlohmann::json inArray = {{{"inNum", 1}, {"inSt", message}}};
     jsonArray.push_back(inArray);
@@ -124,13 +141,15 @@ int main()
         return rc;
     }
 
+    // Before obtaining the command, the status message must be always sent.
     std::string commandString;
     rc = getCommand(context, commandString);
     if (handleRc(rc, &context) != OK)
     {
         return rc;
     }
-    std::cout << "received command: " << commandString << std::endl; // probably "null"
+    // The module gateway may return a "null" value if no command is available.
+    std::cout << "received command: " << commandString << std::endl;
 
     return 0;
 }
