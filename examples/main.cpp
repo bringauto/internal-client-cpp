@@ -80,7 +80,7 @@ int connectToInternalClient(void **context, const std::string &deviceRole, const
 }
 
 /**
- * Sends the status to the specified context.
+ * Sends the status message to the specified context.
  *
  * @param context A pointer to the context.
  * @param message The status message to send.
@@ -88,14 +88,14 @@ int connectToInternalClient(void **context, const std::string &deviceRole, const
  */
 int sendStatus(void *context, bool message)
 {
-    // Structure of the command json message is dependent on the device type
+    // Structure of the status json message is dependent on the device type
     nlohmann::json jsonArray = nlohmann::json::array();
     nlohmann::json inArray = {{{"inNum", 1}, {"inSt", message}}};
     jsonArray.push_back(inArray);
     jsonArray.push_back(nlohmann::json::array());
     jsonArray.push_back({{"butPr", 0}});
     std::string statusMessage = jsonArray.dump();
-    // std::cout << "statusMessage: " << statusMessage << std::endl;
+    std::cout << "statusMessage: " << jsonArray.dump(4) << std::endl;
 
     buffer status{};
     allocate(&status, statusMessage.length());
