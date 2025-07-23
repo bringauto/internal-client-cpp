@@ -20,9 +20,9 @@ int Context::createConnection(const char *ipv4_address, unsigned int port) {
 
 	int flag = 1;
 	// Set TCP_NODELAY to disable Nagle's algorithm
-    if (setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0) {
-        return NOT_OK; // Failed to set TCP_NODELAY
-    }
+	if (setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0) {
+		return NOT_OK; // Failed to set TCP_NODELAY
+	}
 
 	serverAddress_.sin_family = AF_INET;
 	serverAddress_.sin_port = htons(port);
@@ -44,9 +44,9 @@ int Context::reconnect() {
 
 	int flag = 1;
 	// Set TCP_NODELAY to disable Nagle's algorithm
-    if (setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0) {
-        return NOT_OK; // Failed to set TCP_NODELAY
-    }
+	if (setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0) {
+		return NOT_OK; // Failed to set TCP_NODELAY
+	}
 
 	if (connect(socket_, (struct sockaddr*)&serverAddress_, sizeof(serverAddress_)) < 0) {
 		return NOT_OK; // Connection error
@@ -101,8 +101,3 @@ void Context::saveCommand(const std::string &command) {
 Context::~Context() {
 	close(socket_);
 }
-
-
-
-
-
