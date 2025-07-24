@@ -80,11 +80,15 @@ $ cpack
 ```
 
 ## Include library
-After the library is installed, it can be included to a project by using the following lines in CMakeLists.txt
+After the library is installed, it can be included in a project by using the following lines in CMakeLists.txt. ([Fleet protocol](https://github.com/bringauto/fleet-protocol) headers are also required)
 ```cmake
-FIND_PACKAGE(internal-client REQUIRED)
-TARGET_LINK_LIBRARIES(<target> PUBLIC internal_client_library-shared)
+FIND_PACKAGE(internal-client-shared REQUIRED)
+FIND_PACKAGE(fleet-protocol-interface REQUIRED)
+TARGET_LINK_LIBRARIES(<target>
+        PUBLIC
+        internal-client-shared::internal-client-shared
+        fleet-protocol-interface::internal-client-interface)
 ```
 
-And then including header file `internal_client.h` to the source code.
+And then include the header file `internal_client.h` to the source code.
 
