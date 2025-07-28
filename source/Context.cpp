@@ -13,6 +13,9 @@
 #include <unistd.h>
 
 
+static_assert(sizeof(char) == 1, "Size of char must be 1 byte");
+
+
 int Context::createConnection(const char *ipv4_address, unsigned int port) {
 	if ((socket_ = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		return NOT_OK; // Socket creation error
@@ -20,7 +23,7 @@ int Context::createConnection(const char *ipv4_address, unsigned int port) {
 
 	int flag = 1;
 	// Set TCP_NODELAY to disable Nagle's algorithm
-	if (setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, (char8_t *)&flag, sizeof(int)) < 0) {
+	if (setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0) {
 		return NOT_OK; // Failed to set TCP_NODELAY
 	}
 
@@ -44,7 +47,7 @@ int Context::reconnect() {
 
 	int flag = 1;
 	// Set TCP_NODELAY to disable Nagle's algorithm
-	if (setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, (char8_t *)&flag, sizeof(int)) < 0) {
+	if (setsockopt(socket_, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0) {
 		return NOT_OK; // Failed to set TCP_NODELAY
 	}
 
